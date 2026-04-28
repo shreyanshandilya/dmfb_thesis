@@ -1,3 +1,4 @@
+# dmfb.py
 import copy
 import math
 import queue
@@ -6,9 +7,8 @@ import numpy as np
 from PIL import Image
 from enum import IntEnum
 
-import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
+import gymnasium as gym
+from gymnasium import spaces
 
 class Direction(IntEnum):
     N = 0 #North
@@ -17,7 +17,6 @@ class Direction(IntEnum):
     W = 3 #West
 
 class Module:
-    # basically a bbox in the DMFB
     def __init__(self, x_min, x_max, y_min, y_max):
         if x_min > x_max or y_min > y_max:
             raise TypeError('Module() inputs are illegal')
@@ -27,7 +26,6 @@ class Module:
         self.y_max = y_max
 
     def isPointInside(self, point):
-        ''' point is in the form of (y, x) '''
         if point[0] >= self.y_min and point[0] <= self.y_max and\
                 point[1] >= self.x_min and point[1] <= self.x_max:
             return True
@@ -50,35 +48,24 @@ class Module:
             return True
 
 class DMFBEnv(gym.Env):
-    """ A digital microfluidic biochip environment
-        [0,0]
-          +---l---+-> x
-          w       |
-          +-------+
-          |     [1,2]
-          V
-          y
-    """
-    metadata = {'render.modes':
-            ['human', 'rgb_array']}
-    def __init__(self, w, l, b_random = False,
-            n_modules = 0, b_degrade = False,
-            per_degrade = 0.1):
+    metadata = {'render_modes': ['human', 'rgb_array']}
+    
+    def __init__(self, w, l, b_random=False, n_modules=0, b_degrade=False, per_degrade=0.1, penalty_lambda=0.0):
         super(DMFBEnv, self).__init__()
         assert w > 0 and l > 0
         self.width = w
         self.length = l
         self.actions = Direction
-        self.action_space =\
-                spaces.Discrete(len(self.actions))
+        self.action_space = spaces.Discrete(len(self.actions))
         self.observation_space = spaces.Box(
-                low = 0,
-                high = 1,
-                shape = (w, l, 3),
-                dtype = 'uint8')
+                low=0,
+                high=1,
+                shape=(w, l, 3),
+                dtype='uint8')
         self.reward_range = (-1.0, 1.0)
         self.b_random = b_random
         self.b_degrade = b_degrade
+        self.penalty_lambda = penalty_lambda
         self.max_step = 2 * (w + l)
         self.m_health = np.ones((w, l))
         self.m_usage = np.zeros((w, l))
@@ -86,69 +73,68 @@ class DMFBEnv(gym.Env):
         self.m_degrade = self.m_degrade * 0.4 + 0.6
         selection = np.random.rand(w, l)
         per_healthy = 1. - per_degrade
-        self.m_degrade[selection < per_healthy]\
-                = 1.0
+        self.m_degrade[selection < per_healthy] = 1.0
         self.step_count = 0
         if b_random:
-            self.agt_pos, self.agt_end =\
-                    self._randomSartNEnd()
+            self.agt_pos, self.agt_end = self._randomSartNEnd()
         else:
             self.agt_pos = (0, 0)
             self.agt_end = (0, 1)
         self.agt_sta = copy.deepcopy(self.agt_pos)
-        self.modules =\
-                self._genRandomModules(n_modules)
+        self.modules = self._genRandomModules(n_modules)
         self.m_distance = self._computeDist()
 
     def step(self, action):
-        done = False
+        terminated = False
+        truncated = False
         self.step_count += 1
         prev_dist = self._getDist()
         self._updatePosition(action)
         curr_dist = self._getDist()
         obs = self._get_obs()
+        
         if self._isComplete():
             reward = 1.0
-            done = True
+            terminated = True
         elif self.step_count > self.max_step:
             reward = -0.8
-            done = True
-        elif prev_dist > curr_dist: # move toward the goal
+            truncated = True
+        elif prev_dist > curr_dist:
             reward = 0.5
         elif prev_dist == curr_dist:
             reward = -0.3
-        else: # move away the goal
+        else:
             reward = -0.8
-        return obs, reward, done, {}
 
-    def reset(self):
+        usage_count = self.m_usage[self.agt_pos[0]][self.agt_pos[1]]
+        penalty = self.penalty_lambda * usage_count
+        reward -= penalty
+
+        return obs, reward, terminated, truncated, {}
+
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         self.step_count = 0
         if self.b_random is True:
-            self.agt_pos, self.agt_end =\
-                    self._randomSartNEnd()
+            self.agt_pos, self.agt_end = self._randomSartNEnd()
         else:
-            self.agt_pos, self.agt_end =\
-                    self._getNextSartNEnd()
+            self.agt_pos, self.agt_end = self._getNextSartNEnd()
         self.agt_sta = copy.deepcopy(self.agt_pos)
         if len(self.modules) > 0:
             self.modules = self._genRandomModules()
         self._updateHealth()
         self.m_distance = self._computeDist()
         obs = self._get_obs()
-        return obs
+        return obs, {}
 
-    def render(self, mode = 'human'):
-        """ Show environment """
-        #goal:2, pos:1, blocks:-1, degrade: -2
+    def render(self, mode='human'):
         if mode == 'human':
-            img = np.zeros(shape =\
-                    (self.width, self.length))
+            img = np.zeros(shape=(self.width, self.length))
             img[self.agt_end[0]][self.agt_end[1]] = 2
             img[self.agt_pos[0]][self.agt_pos[1]] = 1
             for m in self.modules:
                 for y in range(m.y_min, m.y_max + 1):
-                    for x in range(
-                            m.x_min, m.x_max + 1):
+                    for x in range(m.x_min, m.x_max + 1):
                         img[y][x] = -1
             if self.b_degrade:
                 img[self.m_health < 0.5] = -2
@@ -157,31 +143,26 @@ class DMFBEnv(gym.Env):
             img = self._get_obs().astype(np.uint8)
             for y in range(self.width):
                 for x in range(self.length):
-                    if np.array_equal(img[y][x], [1, 0, 0]): #red
+                    if np.array_equal(img[y][x], [1, 0, 0]):
                         img[y][x] = [255, 0, 0]
-                    elif np.array_equal(img[y][x], [0,1,0]): #gre
+                    elif np.array_equal(img[y][x], [0,1,0]):
                         img[y][x] = [0, 255, 0]
-                    elif np.array_equal(img[y][x], [0,0,1]): #blu
+                    elif np.array_equal(img[y][x], [0,0,1]):
                         img[y][x] = [0, 0, 255]
-                    elif self.b_degrade and\
-                            self.m_health[y][x] < 0.5: #ppl
+                    elif self.b_degrade and self.m_health[y][x] < 0.5:
                         img[y][x] = [255, 102, 255]
-                    elif self.b_degrade and\
-                            self.m_health[y][x] < 0.7: #ppl
+                    elif self.b_degrade and self.m_health[y][x] < 0.7:
                         img[y][x] = [255, 153, 255]
-                    else: # grey
+                    else:
                         img[y][x] = [192, 192, 192]
             return img
         else:
-            raise RuntimeError(
-                    'Unknown mode in render')
+            raise RuntimeError('Unknown mode in render')
 
     def close(self):
-        """ close render view """
         pass
 
-    def _genRandomModules(self, n_modules = 1):
-        """ Generate reandom modules up to n_modules"""
+    def _genRandomModules(self, n_modules=1):
         if self.width < 5 or self.length < 5:
             return []
         if n_modules * 4 / (self.width * self.length) > 0.2:
@@ -218,8 +199,8 @@ class DMFBEnv(gym.Env):
 
     def _computeDist(self):
         m_dist = np.zeros(
-                shape = (self.width, self.length),
-                dtype = np.uint8)
+                shape=(self.width, self.length),
+                dtype=np.uint8)
         q = queue.Queue()
         q.put(self.agt_end)
         m_dist[self.agt_end[0]][self.agt_end[1]] = 1
@@ -258,7 +239,7 @@ class DMFBEnv(gym.Env):
         y = random.randrange(0, self.width)
         start = (y, x)
         repeat = random.randrange(0, self.length * self.width)
-        for i in range(repeate):
+        for i in range(repeat):
             x = random.randrange(0, self.length)
             y = random.randrange(0, self.width)
         end = (y, x)
@@ -293,34 +274,25 @@ class DMFBEnv(gym.Env):
         return self.m_distance[y][x]
 
     def _updatePosition(self, action):
-        # update self.agt_pos
         next_p = list(self.agt_pos)
-        # Not moving if stuck in a bad electrode
         if self.b_degrade:
             prob = self.m_health[next_p[0]][next_p[1]]
-            #if self.m_health[next_p[0]][next_p[1]] < 0.2:
-            #    prob = 0.2
-            #elif self.m_health[next_p[0]][next_p[1]] < 0.5:
-            #    prob = 0.5
-            #elif self.m_health[next_p[0]][next_p[1]] < 0.7:
-            #    prob = 0.7
-            #else:
-            #    prob = 1.0
             if random.random() > prob:
-                return# got random stuck
+                return
         if action == Direction.N:
             next_p[0] -= 1
         elif action == Direction.E:
             next_p[1] += 1
         elif action == Direction.S:
             next_p[0] += 1
-        else: # Direction.W
+        else:
             next_p[1] -= 1
+            
         if not self._isPointInside(next_p):
-            return # no update
+            return 
         elif self._isTouchingModule(next_p):
-            return # no update
-        else: # legal position
+            return 
+        else:
             self.agt_pos = tuple(next_p)
             if self.b_degrade:
                 self.m_usage[next_p[0]][next_p[1]] += 1
@@ -349,14 +321,8 @@ class DMFBEnv(gym.Env):
             return False
 
     def _get_obs(self):
-        """
-        RGB format of image
-        Obstacles - red in layer 0
-        Goal      - greed in layer 1
-        Droplet   - blue in layer 2
-        """
         obs = np.zeros(
-                shape = (self.width, self.length, 3))
+                shape=(self.width, self.length, 3))
         obs = self._addModulesInObs(obs)
         obs[self.agt_end[0]][self.agt_end[1]][1] = 1
         obs[self.agt_pos[0]][self.agt_pos[1]][2] = 1
@@ -369,8 +335,7 @@ class DMFBEnv(gym.Env):
         if n_unhealthy > 2:
             return
         index = self.m_usage > 50.0
-        self.m_health[index] = self.m_health[index] *\
-                self.m_degrade[index]
+        self.m_health[index] = self.m_health[index] * self.m_degrade[index]
         self.m_usage[index] = 0
 
     def _addModulesInObs(self, obs):

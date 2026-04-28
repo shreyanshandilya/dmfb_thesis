@@ -1,55 +1,41 @@
-#!/usr/bin/python
+import torch as th
+import torch.nn as nn
+from gymnasium import spaces
+from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+from stable_baselines3.common.policies import ActorCriticCnnPolicy
 
-import numpy as np
-import tensorflow as tf
+class MyCnnExtractor(BaseFeaturesExtractor):
+    def __init__(self, observation_space: spaces.Box, features_dim: int = 256):
+        super(MyCnnExtractor, self).__init__(observation_space, features_dim)
+        n_input_channels = observation_space.shape[0]
+        
+        self.cnn = nn.Sequential(
+            nn.Conv2d(n_input_channels, 32, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Flatten(),
+        )
 
-from stable_baselines.common.policies import *
+        with th.no_grad():
+            sample_tensor = th.as_tensor(observation_space.sample()[None]).float()
+            n_flatten = self.cnn(sample_tensor).shape[1]
 
-def myCnn(scaled_images, **kwargs):
-    activ = tf.nn.relu
-    layer1 = activ(conv(scaled_images, 'c1',
-            n_filters = 32, filter_size = 3,
-            stride = 1, pad = 'SAME', **kwargs))
-    layer2 = activ(conv(layer1, 'c2',
-            n_filters = 64, filter_size = 3,
-            stride = 1, pad = 'SAME', **kwargs))
-    layer3 = activ(conv(layer2, 'c3',
-            n_filters = 64, filter_size = 3,
-            stride = 1, pad = 'SAME', **kwargs))
-    layer3 = conv_to_fc(layer3)
-    return activ(linear(layer3, 'fc1',
-            n_hidden = 256, init_scale = np.sqrt(2)))
+        self.linear = nn.Sequential(
+            nn.Linear(n_flatten, features_dim),
+            nn.ReLU()
+        )
 
-class MyCnnPolicy(ActorCriticPolicy):
-    def __init__(self, sess, ob_space, ac_space,
-            n_env, n_steps, n_batch, reuse=False,
-            cnn_extractor=nature_cnn,
-            feature_extraction="cnn", **kwargs):
+    def forward(self, observations: th.Tensor) -> th.Tensor:
+        return self.linear(self.cnn(observations))
+
+class MyCnnPolicy(ActorCriticCnnPolicy):
+    def __init__(self, *args, **kwargs):
         super(MyCnnPolicy, self).__init__(
-                sess, ob_space, ac_space, n_env,
-                n_steps, n_batch, reuse=reuse,
-                scale=(feature_extraction == "cnn"))
-        self._kwargs_check(feature_extraction, kwargs)
-
-        with tf.variable_scope("model", reuse=reuse):
-            pi_latent = vf_latent = myCnn(
-                    self.processed_obs, **kwargs)
-            self._value_fn = linear(vf_latent, 'vf', 1)
-            self._proba_distribution, self._policy, self.q_value = \
-                self.pdtype.proba_distribution_from_latent(pi_latent, vf_latent, init_scale=0.01)
-        self._setup_init()
-
-    def step(self, obs, state=None, mask=None, deterministic=False):
-        if deterministic:
-            action, value, neglogp = self.sess.run([self.deterministic_action, self.value_flat, self.neglogp],
-                                                   {self.obs_ph: obs})
-        else:
-            action, value, neglogp = self.sess.run([self.action, self.value_flat, self.neglogp],
-                                                   {self.obs_ph: obs})
-        return action, value, self.initial_state, neglogp
-
-    def proba_step(self, obs, state=None, mask=None):
-        return self.sess.run(self.policy_proba, {self.obs_ph: obs})
-
-    def value(self, obs, state=None, mask=None):
-        return self.sess.run(self.value_flat, {self.obs_ph: obs})
+            *args,
+            **kwargs,
+            features_extractor_class=MyCnnExtractor,
+            features_extractor_kwargs=dict(features_dim=256),
+        )
