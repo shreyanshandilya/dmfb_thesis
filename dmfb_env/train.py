@@ -1,41 +1,48 @@
 import os
+import site
+
+# Ensure Torch DLLs are loaded correctly (Windows specific safeguard)
+for path in site.getsitepackages() + [site.getusersitepackages()]:
+    torch_lib = os.path.join(path, "torch", "lib")
+    if os.path.exists(torch_lib):
+        os.add_dll_directory(torch_lib)
+
 import time
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
-import torch
+import torch 
 
 from utils import OldRouter
-from my_net import MyCnnPolicy
-from envs.dmfb import DMFBEnv
+from envs.dmfb import *
+from my_net import MyCnnPolicy 
 
-from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3 import PPO
 
-def legacyReward(env, b_path=False):
-    router = OldRouter(env)
+def legacyReward(env, b_path = False):
+    # CRITICAL FIX: Add .unwrapped to bypass the SB3 Monitor and access the raw env attributes
+    router = OldRouter(env.unwrapped)
     return router.getReward(b_path)
 
-def EvaluatePolicy(model, env, n_eval_episodes=100, b_path=False):
+def EvaluatePolicy(model, env, n_eval_episodes = 100, b_path = False):
     episode_rewards = []
     legacy_rewards = []
     n_steps = 0
-    for _ in range(n_eval_episodes):
+    for i in range(n_eval_episodes):
         obs = env.reset()
-        done = False
+        done, state = False, None
         episode_reward = 0.0
         this_loop_steps = 0
         while not done:
-            action, _ = model.predict(obs, deterministic=True)
+            action, state = model.predict(obs)
             obs, reward, done, _info = env.step(action)
-            
             reward = reward[0]
             done = done[0]
-            
             episode_reward += reward
             n_steps += 1
             this_loop_steps += 1
-            legacy_r = legacyReward(env.envs[0].unwrapped, b_path)
+            
+            legacy_r = legacyReward(env.envs[0], b_path)
             
         if b_path:
             episode_rewards.append(this_loop_steps)
@@ -47,127 +54,137 @@ def EvaluatePolicy(model, env, n_eval_episodes=100, b_path=False):
     mean_legacy = np.mean(legacy_rewards)
     return mean_reward, n_steps, mean_legacy
 
-def runAnExperiment(env, model=None, num_iterations=2, num_steps=200, policy_steps=128, b_path=False):
+def runAnExperiment(env, model = None, num_iterations = 10, num_steps = 20000, policy_steps = 128, b_path = False):
     if model is None:
-        model = PPO(MyCnnPolicy, env, n_steps=policy_steps, verbose=0)
+        # LOGGING UPDATE: verbose=1 turns on SB3's detailed, real-time terminal output
+        model = PPO(MyCnnPolicy, env, n_steps = policy_steps, verbose=1)
         
     agent_rewards = []
     old_rewards = []
     episodes = []
     
+    print("\n" + "="*60)
+    print("### INITIALIZING NEW EXPERIMENT ###")
+    print("Algorithm: PPO")
+    print("Detailed Logging: ENABLED (verbose=1)")
+    print("CNN Extractor Architecture Loaded:")
+    print(model.policy.features_extractor)
+    print("="*60 + "\n")
+    
     for i in range(num_iterations + 1):
-        model.learn(total_timesteps=num_steps, reset_num_timesteps=False)
-        mean_reward, n_steps, legacy_reward = EvaluatePolicy(
-            model, model.get_env(), n_eval_episodes=50, b_path=b_path
-        )
+        print(f"\n--- Starting Iteration {i}/{num_iterations} (Training for {num_steps} steps) ---")
+        
+        # 1. Train the model
+        model.learn(total_timesteps = num_steps)
+        
+        # 2. Evaluate the model
+        mean_reward, n_steps, legacy_reward = EvaluatePolicy(model, model.get_env(), n_eval_episodes = 50, b_path = b_path)
+        
+        # 3. Calculate current dynamic learning rate
+        progress_remaining = 1.0 - (i / num_iterations)
+        current_lr = model.lr_schedule(progress_remaining) if hasattr(model, 'lr_schedule') else model.learning_rate
+        
+        # 4. End of iteration summary
+        print(f"\n[Summary] Iteration {i} Completed:")
+        print(f"      -> Agent Mean Reward : {mean_reward:.4f}")
+        print(f"      -> Baseline Reward   : {legacy_reward:.4f}")
+        print(f"      -> Current LR        : {current_lr:.6f}")
+        print("-" * 60)
+        
         agent_rewards.append(mean_reward)
         old_rewards.append(legacy_reward)
         episodes.append(i)
         
-    return agent_rewards[-num_iterations:], old_rewards[-num_iterations:], episodes[:num_iterations]
+    agent_rewards = agent_rewards[-num_iterations:]
+    old_rewards = old_rewards[-num_iterations:]
+    episodes = episodes[:num_iterations]
+    
+    # Return the trained model so we can extract its weights in expSeveralRuns
+    return agent_rewards, old_rewards, episodes, model
 
-def find_intersection(a_rewards, o_rewards, episodes):
-    for i in range(1, len(episodes)):
-        if (a_rewards[i-1] < o_rewards[i-1] and a_rewards[i] >= o_rewards[i]) or \
-           (a_rewards[i-1] > o_rewards[i-1] and a_rewards[i] <= o_rewards[i]):
-            return episodes[i]
-    return None
+def showIsGPU():
+    if torch.cuda.is_available():
+        print("### Training on GPUs... ###")
+    else:
+        print("### Training on CPUs... ###")
 
-def plotCombinedPerformance(all_results, o_rewards, size, env_info, b_path=False):
-    episodes = list(range(len(list(all_results.values())[0][0])))
+def plotAgentPerformance(a_rewards, o_rewards, size, env_info, b_path = False):
+    a_rewards = np.array(a_rewards)
+    o_rewards = np.array(o_rewards)
+    a_line = np.average(a_rewards, axis = 0)
+    o_line = np.average(o_rewards, axis = 0)
+    a_max = np.max(a_rewards, axis = 0)
+    a_min = np.min(a_rewards, axis = 0)
+    o_max = np.max(o_rewards, axis = 0)
+    o_min = np.min(o_rewards, axis = 0)
+    episodes = list(range(len(a_max)))
     
     with plt.style.context('ggplot'):
-        plt.rcParams.update({'font.size': 12})
-        plt.figure(figsize=(12, 8))
+        plt.rcParams.update({'font.size': 20})
+        plt.figure()
+        plt.fill_between(episodes, a_max, a_min, facecolor = 'red', alpha = 0.3)
+        plt.fill_between(episodes, o_max, o_min, facecolor = 'blue', alpha = 0.3)
+        plt.plot(episodes, a_line, 'r-', label = 'Agent')
+        plt.plot(episodes, o_line, 'b-', label = 'Baseline')
         
-        colors = ['red', 'green', 'blue', 'orange', 'purple', 'cyan']
-        
-        for idx, (lambda_val, a_rewards) in enumerate(all_results.items()):
-            a_rewards = np.array(a_rewards)
-            a_line = np.average(a_rewards, axis=0)
-            a_max = np.max(a_rewards, axis=0)
-            a_min = np.min(a_rewards, axis=0)
-            
-            color = colors[idx % len(colors)]
-            plt.fill_between(episodes, a_max, a_min, facecolor=color, alpha=0.1)
-            plt.plot(episodes, a_line, color=color, label=f'Agent (\u03bb = {lambda_val})')
-            
-        if o_rewards is not None:
-            o_rewards = np.array(o_rewards)
-            o_line = np.average(o_rewards, axis=0)
-            o_max = np.max(o_rewards, axis=0)
-            o_min = np.min(o_rewards, axis=0)
-            plt.fill_between(episodes, o_max, o_min, facecolor='black', alpha=0.1)
-            plt.plot(episodes, o_line, color='black', linestyle='--', label='Baseline')
-        
-        loc = 'upper left' if b_path else 'lower right'
-        leg = plt.legend(loc=loc, shadow=True, fancybox=True)
+        if b_path:
+            leg = plt.legend(loc = 'upper left', shadow = True, fancybox = True)
+        else:
+            leg = plt.legend(loc = 'lower right', shadow = True, fancybox = True)
         leg.get_frame().set_alpha(0.5)
-        
-        plt.title(f"DMFB {size} Combined Lambda Curves")
+        plt.title("DMFB " + size)
         plt.xlabel('Training Epochs')
-        plt.ylabel('Number of Cycles' if b_path else 'Score')
+        
+        if b_path:
+            plt.ylabel('Number of Cycles')
+        else:
+            plt.ylabel('Score')
+            
         plt.tight_layout()
         
         os.makedirs('log', exist_ok=True)
-        plt.savefig(f'log/{size}{env_info}_combined_curves.png')
-        plt.close()
+        plt.savefig('log/' + size + env_info + '.png')
 
-def expSeveralRuns(args, n_e, n_s, n_repeat, lambdas):
-    size = f"{args['w']}x{args['l']}"
-    env_info = f"_m{args['n_modules']}"
+def expSeveralRuns(args, n_e, n_s, n_repeat):
+    size = str(args['w']) + 'x' + str(args['l'])
+    env_info = '_m' + str(args['n_modules'])
     
-    all_results = {}
-    baseline_rewards_all = None
+    env = make_vec_env(DMFBEnv, n_envs = n_e, env_kwargs = args)
+    showIsGPU()
     
-    for lambda_val in lambdas:
-        print(f"\n========================================")
-        print(f"Evaluating Lambda = {lambda_val}")
-        print(f"========================================")
+    a_rewards = []
+    o_rewards = []
+    final_model = None # Variable to hold our trained model
+    
+    for i in range(n_repeat):
+        print(f"\n>>> Starting Repeat Run {i+1}/{n_repeat} <<<")
+        # Catch the returned model here
+        a_r, o_r, episodes, trained_model = runAnExperiment(env, num_iterations = 2, num_steps = 20, policy_steps = n_s)
+        a_rewards.append(a_r)
+        o_rewards.append(o_r)
+        final_model = trained_model
         
-        args['penalty_lambda'] = lambda_val
-        env = make_vec_env(DMFBEnv, n_envs=n_e, env_kwargs=args)
+    plotAgentPerformance(a_rewards, o_rewards, size, env_info)
+    
+    # ==========================================
+    # WEIGHT EXTRACTION
+    # ==========================================
+    print("\n" + "="*60)
+    print("### FINAL MODEL WEIGHTS ###")
+    
+    print("\nExtracting CNN Weights...")
+    # Target the features extractor (the Table1CNN) inside the PPO policy
+    cnn_state_dict = final_model.policy.features_extractor.state_dict()
+    
+    for layer_name, weight_tensor in cnn_state_dict.items():
+        print(f"\n-> Layer: {layer_name} | Shape: {weight_tensor.shape}")
+        # Convert the PyTorch tensor to a numpy array and print it
+        print(weight_tensor.cpu().numpy())
         
-        a_rewards_all = []
-        o_rewards_all = []
-        
-        for rep in range(n_repeat):
-            a_r, o_r, episodes = runAnExperiment(env, num_iterations=2, num_steps=200, policy_steps=n_s)
-            a_rewards_all.append(a_r)
-            o_rewards_all.append(o_r)
-            
-        all_results[lambda_val] = a_rewards_all
-        
-        if lambda_val == 0:
-            baseline_rewards_all = o_rewards_all
-            
-        a_avg = np.average(a_rewards_all, axis=0)
-        o_avg = np.average(o_rewards_all, axis=0)
-        
-        intersection_epoch = find_intersection(a_avg, o_avg, episodes)
-        
-        print(f"Agent Rewards: {a_avg}")
-        print(f"Baseline Rewards: {o_avg}")
-        
-        if intersection_epoch is not None:
-            print(f"Intersection at Epoch: {intersection_epoch}")
-        else:
-            print("No intersection seen.")
-            
-        final_memory_matrix = env.envs[0].unwrapped.m_usage
-        print(f"Final Memory Matrix:\n{final_memory_matrix}")
-        
-    plotCombinedPerformance(all_results, baseline_rewards_all, size, env_info)
+    print("="*60 + "\n")
 
-if __name__ == '__main__':
-    sizes = [15]
-    lambdas_to_test = [0, 0.1, 0.25, 0.5, 0.75, 1] 
-    
-    for s in sizes:
-        config = {
-            'w': s, 'l': s,
-            'n_modules': 0,
-            'b_degrade': True,
-            'per_degrade': 0.1
-        }
-        expSeveralRuns(config, n_e=1, n_s=64, n_repeat=3, lambdas=lambdas_to_test)
+sizes = [10]
+for s in sizes:
+    args = {'w': s, 'l': s, 'n_modules': 0, 'b_degrade': False, 'per_degrade': 0.0}
+    expSeveralRuns(args, n_e = 8, n_s = 64, n_repeat = 3)
+print('### Finished train.py successfully ###')

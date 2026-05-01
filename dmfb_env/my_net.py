@@ -1,41 +1,49 @@
-import torch as th
+import torch
 import torch.nn as nn
-from gymnasium import spaces
+import gymnasium as gym
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
-from stable_baselines3.common.policies import ActorCriticCnnPolicy
+from stable_baselines3.common.policies import ActorCriticPolicy
 
-class MyCnnExtractor(BaseFeaturesExtractor):
-    def __init__(self, observation_space: spaces.Box, features_dim: int = 256):
-        super(MyCnnExtractor, self).__init__(observation_space, features_dim)
-        n_input_channels = observation_space.shape[0]
+class Table1CNN(BaseFeaturesExtractor):
+    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 8):
+        super(Table1CNN, self).__init__(observation_space, features_dim)
         
+        n_input_channels = observation_space.shape[0]
+
         self.cnn = nn.Sequential(
-            nn.Conv2d(n_input_channels, 32, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(n_input_channels, 32, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(32, 32, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
+            nn.Conv2d(64, 128, kernel_size=3, stride=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(128, 128, kernel_size=3, stride=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
             nn.Flatten(),
         )
 
-        with th.no_grad():
-            sample_tensor = th.as_tensor(observation_space.sample()[None]).float()
-            n_flatten = self.cnn(sample_tensor).shape[1]
+        with torch.no_grad():
+            dummy_obs = torch.as_tensor(observation_space.sample()[None]).float()
+            n_flatten = self.cnn(dummy_obs).shape[1]
 
         self.linear = nn.Sequential(
             nn.Linear(n_flatten, features_dim),
             nn.ReLU()
         )
 
-    def forward(self, observations: th.Tensor) -> th.Tensor:
+    def forward(self, observations: torch.Tensor) -> torch.Tensor:
         return self.linear(self.cnn(observations))
 
-class MyCnnPolicy(ActorCriticCnnPolicy):
+class MyCnnPolicy(ActorCriticPolicy):
     def __init__(self, *args, **kwargs):
-        super(MyCnnPolicy, self).__init__(
-            *args,
-            **kwargs,
-            features_extractor_class=MyCnnExtractor,
-            features_extractor_kwargs=dict(features_dim=256),
-        )
+        kwargs["features_extractor_class"] = Table1CNN
+        kwargs["features_extractor_kwargs"] = dict(features_dim=8)
+        kwargs["net_arch"] = []
+        super(MyCnnPolicy, self).__init__(*args, **kwargs)
