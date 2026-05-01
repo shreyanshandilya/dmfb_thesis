@@ -53,8 +53,17 @@ class DMFBEnv(gym.Env):
     def __init__(self, w=10, l=10, n_modules=0, b_degrade=False, per_degrade=0.0, use_wear_leveling=False, **kwargs):
         super(DMFBEnv, self).__init__()
         assert w > 0 and l > 0
+        
         self.width = w
         self.length = l
+        
+        # Save the wear-leveling toggle state and lambda factor
+        self.use_wear_leveling = use_wear_leveling 
+        self.penalty_lambda = kwargs.get('penalty_lambda', 0.0015)
+        
+        # Safely extract b_random (defaults to True if not provided)
+        self.b_random = kwargs.get('b_random', True)
+        
         self.actions = Direction
         self.action_space = spaces.Discrete(len(self.actions))
         self.observation_space = spaces.Box(
@@ -63,32 +72,32 @@ class DMFBEnv(gym.Env):
                 shape=(w, l, 3),
                 dtype='uint8')
         self.reward_range = (-1.0, 1.0)
-        self.b_random = b_random
+        
         self.b_degrade = b_degrade
-        self.penalty_lambda = penalty_lambda
         self.max_step = 2 * (w + l)
+        
         self.m_health = np.ones((w, l))
-        self.m_usage = np.zeros((w, l))
+        # Initialize tracking matrix for the wear-leveling penalty
+        self.m_usage = np.zeros((w, l)) 
+        
         self.m_degrade = np.random.rand(w, l)
         self.m_degrade = self.m_degrade * 0.4 + 0.6
         selection = np.random.rand(w, l)
         per_healthy = 1. - per_degrade
         self.m_degrade[selection < per_healthy] = 1.0
+        
         self.step_count = 0
-        if b_random:
+        
+        if self.b_random:
             self.agt_pos, self.agt_end = self._randomSartNEnd()
         else:
             self.agt_pos = (0, 0)
             self.agt_end = (0, 1)
+            
         self.agt_sta = copy.deepcopy(self.agt_pos)
         self.modules = self._genRandomModules(n_modules)
         self.m_distance = self._computeDist()
         
-        self.width = w
-        self.length = l
-        self.use_wear_leveling = use_wear_leveling # Save the toggle state
-        self.electrode_usage = np.zeros((self.width, self.length)) # Initialize tracking matrix
-
     def step(self, action):
         terminated = False
         truncated = False
@@ -129,21 +138,31 @@ class DMFBEnv(gym.Env):
 
         return obs, reward, terminated, truncated, {}
 
-    def reset(self, **kwargs):
+    def reset(self, seed=None, options=None, **kwargs):
+        # Pass the seed safely to the parent class
         super().reset(seed=seed)
+        
         self.step_count = 0
+        
         if self.b_random is True:
             self.agt_pos, self.agt_end = self._randomSartNEnd()
         else:
             self.agt_pos, self.agt_end = self._getNextSartNEnd()
+            
         self.agt_sta = copy.deepcopy(self.agt_pos)
+        
         if len(self.modules) > 0:
             self.modules = self._genRandomModules()
+            
         self._updateHealth()
         self.m_distance = self._computeDist()
-        self.electrode_usage = np.zeros((self.width, self.length))
-        return self.get_obs(), {} # Or whatever your specific return statement is
-
+        
+        # Reset the tracking matrix for wear-leveling (using the correct variable name)
+        self.m_usage = np.zeros((self.width, self.length))
+        
+        # Return observation and the info dict (standard Gymnasium format)
+        return self._get_obs(), {}
+    
     def render(self, mode='human'):
         if mode == 'human':
             img = np.zeros(shape=(self.width, self.length))
