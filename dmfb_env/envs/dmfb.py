@@ -50,7 +50,7 @@ class Module:
 class DMFBEnv(gym.Env):
     metadata = {'render_modes': ['human', 'rgb_array']}
     
-    def __init__(self, w, l, b_random=False, n_modules=0, b_degrade=False, per_degrade=0.1, penalty_lambda=0.0):
+    def __init__(self, w=10, l=10, n_modules=0, b_degrade=False, per_degrade=0.0, use_wear_leveling=False, **kwargs):
         super(DMFBEnv, self).__init__()
         assert w > 0 and l > 0
         self.width = w
@@ -83,16 +83,31 @@ class DMFBEnv(gym.Env):
         self.agt_sta = copy.deepcopy(self.agt_pos)
         self.modules = self._genRandomModules(n_modules)
         self.m_distance = self._computeDist()
+        
+        self.width = w
+        self.length = l
+        self.use_wear_leveling = use_wear_leveling # Save the toggle state
+        self.electrode_usage = np.zeros((self.width, self.length)) # Initialize tracking matrix
 
     def step(self, action):
         terminated = False
         truncated = False
         self.step_count += 1
+        
+        # 1. Get distance before action
         prev_dist = self._getDist()
+        
+        # 2. Move the droplet
         self._updatePosition(action)
+        
+        # 3. Track that the new electrode was stepped on
+        self.m_usage[self.agt_pos[0]][self.agt_pos[1]] += 1
+        
+        # 4. Get distance after action and update observation
         curr_dist = self._getDist()
         obs = self._get_obs()
         
+        # 5. Base Reward Logic[cite: 5]
         if self._isComplete():
             reward = 1.0
             terminated = True
@@ -106,13 +121,15 @@ class DMFBEnv(gym.Env):
         else:
             reward = -0.8
 
-        usage_count = self.m_usage[self.agt_pos[0]][self.agt_pos[1]]
-        penalty = self.penalty_lambda * usage_count
-        reward -= penalty
+        # 6. Apply Wear-Leveling Penalty ONLY if enabled and task isn't finished
+        if self.use_wear_leveling and not terminated:
+            usage_count = self.m_usage[self.agt_pos[0]][self.agt_pos[1]]
+            penalty = self.penalty_lambda * usage_count
+            reward -= penalty
 
         return obs, reward, terminated, truncated, {}
 
-    def reset(self, seed=None, options=None):
+    def reset(self, **kwargs):
         super().reset(seed=seed)
         self.step_count = 0
         if self.b_random is True:
@@ -124,8 +141,8 @@ class DMFBEnv(gym.Env):
             self.modules = self._genRandomModules()
         self._updateHealth()
         self.m_distance = self._computeDist()
-        obs = self._get_obs()
-        return obs, {}
+        self.electrode_usage = np.zeros((self.width, self.length))
+        return self.get_obs(), {} # Or whatever your specific return statement is
 
     def render(self, mode='human'):
         if mode == 'human':

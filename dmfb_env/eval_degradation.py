@@ -1,0 +1,110 @@
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import torch 
+
+from utils import OldRouter
+from envs.dmfb import *
+from my_net import MyCnnPolicy, Table1CNN
+
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3 import PPO
+
+def legacyReward(env, b_path = False):
+    router = OldRouter(env.unwrapped)
+    return router.getReward(b_path)
+
+def EvaluatePolicyCycles(model, env, n_eval_episodes = 50):
+    """Evaluates the policy and strictly returns the average number of cycles (steps) taken."""
+    episode_cycles = []
+    legacy_cycles = []
+    
+    for i in range(n_eval_episodes):
+        obs = env.reset()
+        done = False
+        this_loop_steps = 0
+        
+        while not done:
+            action, state = model.predict(obs)
+            obs, reward, done, _info = env.step(action)
+            done = done[0]
+            this_loop_steps += 1
+            
+            # True forces the old router to return path length (cycles)
+            legacy_r = legacyReward(env.envs[0], b_path=True) 
+            
+        episode_cycles.append(this_loop_steps)
+        legacy_cycles.append(legacy_r)
+        
+    return np.mean(episode_cycles), np.mean(legacy_cycles)
+
+def runAdaptationPhase(env, model_path, num_iterations = 30, num_steps = 20000):
+    print(f"\nLoading base healthy model from {model_path}.zip ...")
+    model = PPO.load(model_path, env=env)
+        
+    agent_cycles_history = []
+    baseline_cycles_history = []
+    episodes = []
+    
+    for i in range(num_iterations):
+        print(f"--- Adaptation Epoch {i+1}/{num_iterations} ---")
+        model.learn(total_timesteps = num_steps)
+        
+        mean_cycles, mean_legacy_cycles = EvaluatePolicyCycles(model, model.get_env(), n_eval_episodes = 50)
+        
+        print(f"    -> Agent Avg Cycles   : {mean_cycles:.2f}")
+        print(f"    -> Baseline Avg Cycles: {mean_legacy_cycles:.2f}")
+        
+        agent_cycles_history.append(mean_cycles)
+        baseline_cycles_history.append(mean_legacy_cycles)
+        episodes.append(i)
+        
+    return agent_cycles_history, baseline_cycles_history, episodes
+
+def plotEvaluation(std_cycles, wear_cycles, base_cycles, size):
+    std_cycles = np.array(std_cycles)
+    wear_cycles = np.array(wear_cycles)
+    base_cycles = np.array(base_cycles)
+    
+    episodes = list(range(len(std_cycles)))
+    
+    with plt.style.context('ggplot'):
+        plt.rcParams.update({'font.size': 16})
+        plt.figure(figsize=(10, 6))
+        
+        plt.plot(episodes, std_cycles, 'r-', label = 'Standard RL Agent', linewidth=2)
+        plt.plot(episodes, wear_cycles, 'g-', label = 'Wear-Leveling Agent (\u03BB=0.0015)', linewidth=2)
+        plt.plot(episodes, base_cycles, 'b--', label = 'Static Baseline', linewidth=2)
+        
+        plt.legend(loc = 'upper right', shadow = True, fancybox = True)
+        plt.title(f"DMFB {size} Degradation Evaluation (50%)")
+        plt.xlabel('Adaptation Epochs')
+        plt.ylabel('Number of Cycles') 
+        
+        plt.tight_layout()
+        os.makedirs('log', exist_ok=True)
+        plt.savefig(f'log/evaluation_comparison_{size}.png')
+        print(f"\nPlot saved to log/evaluation_comparison_{size}.png")
+
+if __name__ == '__main__':
+    size_str = "10x10"
+    saved_model_name = "ppo_dmfb_model_10x10" 
+    
+    # 1. Evaluate the Standard Agent
+    print("\n" + "="*50)
+    print("STARTING EVALUATION: STANDARD RL AGENT")
+    print("="*50)
+    args_std = {'w': 10, 'l': 10, 'n_modules': 0, 'b_degrade': True, 'per_degrade': 0.5, 'use_wear_leveling': False}
+    env_std = make_vec_env(DMFBEnv, n_envs = 8, env_kwargs = args_std)
+    std_agent_cycles, baseline_cycles, _ = runAdaptationPhase(env_std, saved_model_name, num_iterations=30)
+
+    # 2. Evaluate Your Wear-Leveling Agent
+    print("\n" + "="*50)
+    print("STARTING EVALUATION: WEAR-LEVELING AGENT (\u03BB=0.0015)")
+    print("="*50)
+    args_wear = {'w': 10, 'l': 10, 'n_modules': 0, 'b_degrade': True, 'per_degrade': 0.5, 'use_wear_leveling': True}
+    env_wear = make_vec_env(DMFBEnv, n_envs = 8, env_kwargs = args_wear)
+    wear_agent_cycles, _, _ = runAdaptationPhase(env_wear, saved_model_name, num_iterations=30)
+
+    # 3. Plot the final comparison
+    plotEvaluation(std_agent_cycles, wear_agent_cycles, baseline_cycles, size_str)
