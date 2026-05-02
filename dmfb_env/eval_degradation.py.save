@@ -96,7 +96,7 @@ if __name__ == '__main__':
     print("="*50)
     args_std = {'w': 10, 'l': 10, 'n_modules': 0, 'b_degrade': True, 'per_degrade': 0.5, 'use_wear_leveling': False}
     env_std = make_vec_env(DMFBEnv, n_envs = 8, env_kwargs = args_std)
-    std_agent_cycles, baseline_cycles, _ = runAdaptationPhase(env_std, saved_model_name, num_iterations=30)
+    std_agent_cycles, baseline_cycles, _ = runAdaptationPhase(env_std, saved_model_name, num_iterations=2)
 
     # 2. Evaluate Your Wear-Leveling Agent
     print("\n" + "="*50)
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     print("="*50)
     args_wear = {'w': 10, 'l': 10, 'n_modules': 0, 'b_degrade': True, 'per_degrade': 0.5, 'use_wear_leveling': True}
     env_wear = make_vec_env(DMFBEnv, n_envs = 8, env_kwargs = args_wear)
-    wear_agent_cycles, _, _ = runAdaptationPhase(env_wear, saved_model_name, num_iterations=30)
+    wear_agent_cycles, _, _ = runAdaptationPhase(env_wear, saved_model_name, num_iterations=2)
 
     # ---> ADD THIS BLOCK RIGHT HERE <---
     print("\n" + "="*80, flush=True)
