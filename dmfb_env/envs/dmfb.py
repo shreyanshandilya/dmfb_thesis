@@ -70,7 +70,7 @@ class DMFBEnv(gym.Env):
                 low=0,
                 high=1,
                 shape=(w, l, 3),
-                dtype='uint8')
+                dtype=np.float32)
         self.reward_range = (-1.0, 1.0)
         
         self.b_degrade = b_degrade

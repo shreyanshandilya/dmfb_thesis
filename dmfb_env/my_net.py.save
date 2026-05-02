@@ -5,35 +5,32 @@ from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from stable_baselines3.common.policies import ActorCriticPolicy
 
 class Table1CNN(BaseFeaturesExtractor):
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 8):
+    def __init__(self, observation_space: gym.spaces.B features_dim: int = 8):
         super(Table1CNN, self).__init__(observation_space, features_dim)
         
-        # 1. Grab the channel dimension from index 2 instead of 0
-        n_input_channels = observation_space.shape[2]
+        n_input_channels = observation_space.shape[0]
 
         self.cnn = nn.Sequential(
-            nn.Conv2d(n_input_channels, 32, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(n_input_channels, 32, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(32, 32, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(64, 64, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
+            nn.Conv2d(64, 128, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(128, 128, kernel_size=3, stride=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
+            nn.MaxPool2d(kernel_size=2, stride=2, padding=1),
             nn.Flatten(),
         )
 
         with torch.no_grad():
             dummy_obs = torch.as_tensor(observation_space.sample()[None]).float()
-            # 2. Manually transpose dummy_obs to (Batch, Channels, Height, Width)
-            dummy_obs = dummy_obs.permute(0, 3, 1, 2)
             n_flatten = self.cnn(dummy_obs).shape[1]
 
         self.linear = nn.Sequential(
@@ -42,8 +39,6 @@ class Table1CNN(BaseFeaturesExtractor):
         )
 
     def forward(self, observations: torch.Tensor) -> torch.Tensor:
-        # 3. Manually transpose observations during training and prediction
-        observations = observations.permute(0, 3, 1, 2)
         return self.linear(self.cnn(observations))
 
 class MyCnnPolicy(ActorCriticPolicy):
@@ -51,4 +46,4 @@ class MyCnnPolicy(ActorCriticPolicy):
         kwargs["features_extractor_class"] = Table1CNN
         kwargs["features_extractor_kwargs"] = dict(features_dim=8)
         kwargs["net_arch"] = []
-        super(MyCnnPolicy, self).__init__(*args, **kwargs)
+        super(MyCnnPolicy, self).__init__(*args, **kwargs

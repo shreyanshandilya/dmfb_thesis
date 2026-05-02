@@ -1,11 +1,4 @@
 import os
-import site
-
-for path in site.getsitepackages() + [site.getusersitepackages()]:
-    torch_lib = os.path.join(path, "torch", "lib")
-    if os.path.exists(torch_lib):
-        os.add_dll_directory(torch_lib)
-
 import time
 import numpy as np
 import matplotlib.pyplot as plt
