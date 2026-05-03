@@ -15,20 +15,27 @@ def legacyReward(env, b_path=False):
     router = OldRouter(env.unwrapped)
     return router.getReward(b_path)
 
-def plotEvaluation(std_cycles, wear_cycles, base_cycles, size):
-    std_cycles = np.array(std_cycles)
-    wear_cycles = np.array(wear_cycles)
-    base_cycles = np.array(base_cycles)
+def plotEvaluation(std_data, wear_data, base_data, size):
+    # Unpack the mean, min, and max tuples
+    std_mean, std_min, std_max = zip(*std_data)
+    wear_mean, wear_min, wear_max = zip(*wear_data)
+    base_mean, base_min, base_max = zip(*base_data)
     
-    episodes = list(range(len(std_cycles)))
+    episodes = list(range(len(std_mean)))
     
     with plt.style.context('ggplot'):
         plt.rcParams.update({'font.size': 16})
         plt.figure(figsize=(10, 6))
         
-        plt.plot(episodes, std_cycles, 'r-', label='Standard RL Agent', linewidth=2)
-        plt.plot(episodes, wear_cycles, 'g-', label='Wear-Leveling Agent (\u03BB=0.0015)', linewidth=2)
-        plt.plot(episodes, base_cycles, 'b--', label='Static Baseline', linewidth=2)
+        # Plot the average lines
+        plt.plot(episodes, std_mean, 'r-', label='Standard RL Agent', linewidth=2)
+        plt.plot(episodes, wear_mean, 'g-', label='Wear-Leveling Agent (exp_cap)', linewidth=2)
+        plt.plot(episodes, base_mean, 'b--', label='Static Baseline', linewidth=2)
+        
+        # Plot the shaded regions representing best (min) and worst (max) performance
+        plt.fill_between(episodes, std_min, std_max, color='red', alpha=0.2)
+        plt.fill_between(episodes, wear_min, wear_max, color='green', alpha=0.2)
+        plt.fill_between(episodes, base_min, base_max, color='blue', alpha=0.2)
         
         plt.legend(loc='upper right', shadow=True, fancybox=True)
         plt.title(f"DMFB {size} Parallel Degradation Evaluation (50%)")
@@ -37,23 +44,20 @@ def plotEvaluation(std_cycles, wear_cycles, base_cycles, size):
         
         plt.tight_layout()
         os.makedirs('log', exist_ok=True)
-        plt.savefig(f'log/parallel_eval_{size}.png')
-        print(f"\n[Success] Plot saved to log/parallel_eval_{size}.png", flush=True)
+        plt.savefig(f'log/parallel_eval_shaded_{size}.png')
+        print(f"\n[Success] Shaded Plot saved to log/parallel_eval_shaded_{size}.png", flush=True)
 
 if __name__ == '__main__':
     size_str = "10x10"
     saved_model_name = "ppo_dmfb_model_10x10" 
     
-    num_iterations = 40
+    num_iterations = 100
     num_steps_per_epoch = 20000
-    n_eval_episodes = 50
+    n_eval_episodes = 5 # Run 5 tasks per epoch for variance shading
 
     print("\n" + "="*80, flush=True)
     print("### INITIALIZING PARALLEL EVALUATION ENVIRONMENTS ###", flush=True)
     
-    # 1. Ensure Identical Chip Layouts (50% Degradation map)
-    # By using the exact same seed before creating the environments, 
-    # the 50% degraded electrodes will be in the exact same physical locations.
     np.random.seed(42)
     args_std = {'w': 10, 'l': 10, 'n_modules': 0, 'b_degrade': True, 'per_degrade': 0.5, 'use_wear_leveling': False, 'b_random': False}
     env_std = make_vec_env(DMFBEnv, n_envs=8, env_kwargs=args_std)
@@ -62,9 +66,9 @@ if __name__ == '__main__':
     args_wear = {'w': 10, 'l': 10, 'n_modules': 0, 'b_degrade': True, 'per_degrade': 0.5, 'use_wear_leveling': True, 'b_random': False}
     env_wear = make_vec_env(DMFBEnv, n_envs=8, env_kwargs=args_wear)
 
-    # Load the identical healthy starting brains
-    model_std = PPO.load(saved_model_name, env=env_std)
-    model_wear = PPO.load(saved_model_name, env=env_wear)
+    # Set verbose=0 to hide SB3 boxes
+    model_std = PPO.load(saved_model_name, env=env_std, verbose=0)
+    model_wear = PPO.load(saved_model_name, env=env_wear, verbose=0)
 
     history_std = []
     history_wear = []
@@ -72,21 +76,19 @@ if __name__ == '__main__':
 
     print("="*80 + "\n", flush=True)
 
-    # Parallel Execution Loop
     for epoch in range(num_iterations):
         print(f"--- Adaptation Epoch {epoch+1}/{num_iterations} ---", flush=True)
         
-        # 1. Both agents learn on their respective (increasingly degraded) boards
-        model_std.learn(total_timesteps=num_steps_per_epoch,log_interval=500)
-        model_wear.learn(total_timesteps=num_steps_per_epoch,log_interval=500)
+        # Adaptation Phase (Learn)
+        model_std.learn(total_timesteps=num_steps_per_epoch)
+        model_wear.learn(total_timesteps=num_steps_per_epoch)
         
-        # 2. Testing Phase
         epoch_std_cycles = []
         epoch_wear_cycles = []
         epoch_base_cycles = []
 
-        # Generate 50 identical tasks for this epoch
-        random.seed(100 + epoch) # Ensures tasks change per epoch, but are identical for all agents
+        # 5 Exact same random tasks to calculate variance
+        random.seed(100 + epoch) 
         
         for task in range(n_eval_episodes):
             start_pos = (random.randrange(0, 10), random.randrange(0, 10))
@@ -94,7 +96,7 @@ if __name__ == '__main__':
             while end_pos == start_pos:
                 end_pos = (random.randrange(0, 10), random.randrange(0, 10))
 
-            # A. Test Standard Agent
+            # Test Standard
             env_std.envs[0].unwrapped.injected_start = start_pos
             env_std.envs[0].unwrapped.injected_end = end_pos
             obs_std = env_std.reset()
@@ -107,7 +109,7 @@ if __name__ == '__main__':
                 steps += 1
             epoch_std_cycles.append(steps)
 
-            # B. Test Wear-Leveling Agent
+            # Test Wear-Leveling
             env_wear.envs[0].unwrapped.injected_start = start_pos
             env_wear.envs[0].unwrapped.injected_end = end_pos
             obs_wear = env_wear.reset()
@@ -120,29 +122,32 @@ if __name__ == '__main__':
                 steps += 1
             epoch_wear_cycles.append(steps)
 
-            # C. Test Static Baseline (Using std board to calculate static math)
+            # Test Baseline
             legacy_r = legacyReward(env_std.envs[0], b_path=True)
             epoch_base_cycles.append(legacy_r)
 
-        # 3. Log Averages for the Epoch
-        avg_std = np.mean(epoch_std_cycles)
-        avg_wear = np.mean(epoch_wear_cycles)
-        avg_base = np.mean(epoch_base_cycles)
+        # Record (Mean, Min, Max) tuples for the plot
+        history_std.append((np.mean(epoch_std_cycles), np.min(epoch_std_cycles), np.max(epoch_std_cycles)))
+        history_wear.append((np.mean(epoch_wear_cycles), np.min(epoch_wear_cycles), np.max(epoch_wear_cycles)))
+        history_base.append((np.mean(epoch_base_cycles), np.min(epoch_base_cycles), np.max(epoch_base_cycles)))
 
-        print(f"    -> Static Baseline Cycles: {avg_base:.2f}", flush=True)
-        print(f"    -> Standard Agent Cycles : {avg_std:.2f}", flush=True)
-        print(f"    -> Wear-Leveling Cycles  : {avg_wear:.2f}\n", flush=True)
-
-        history_std.append(avg_std)
-        history_wear.append(avg_wear)
-        history_base.append(avg_base)
-
-    # Final Output
-    print("\n" + "="*80, flush=True)
-    print("### FINAL ADAPTATION CYCLES PER EPOCH (50% DEGRADATION) ###", flush=True)
-    print(f"Static Baseline Cycles : {[round(num, 2) for num in history_base]}", flush=True)
-    print(f"Standard Agent Cycles  : {[round(num, 2) for num in history_std]}", flush=True)
-    print(f"Wear-Leveling Cycles   : {[round(num, 2) for num in history_wear]}", flush=True)
-    print("="*80 + "\n", flush=True)
+        print(f"    -> Static Baseline Cycles: {history_base[-1][0]:.2f}", flush=True)
+        print(f"    -> Standard Agent Cycles : {history_std[-1][0]:.2f}", flush=True)
+        print(f"    -> Wear-Leveling Cycles  : {history_wear[-1][0]:.2f}\n", flush=True)
 
     plotEvaluation(history_std, history_wear, history_base, size_str)
+    # ---> ADD THIS BLOCK AT THE VERY END OF THE SCRIPT <---
+    print("\n" + "-"*80, flush=True)
+    print("### FINAL WEAR-LEVELING VARIANCE ANALYSIS ###", flush=True)
+    
+    # Extract the permanent usage matrices from the environments
+    std_usage_matrix = env_std.envs[0].unwrapped.m_usage
+    wear_usage_matrix = env_wear.envs[0].unwrapped.m_usage
+    
+    # Calculate Variance (Lower variance = better wear leveling)
+    std_variance = np.var(std_usage_matrix[env_std.envs[0].unwrapped.m_degrade < 1.0])
+    wear_variance = np.var(wear_usage_matrix[env_wear.envs[0].unwrapped.m_degrade < 1.0])
+    
+    print(f"Standard Agent Usage Variance: {std_variance:.2f}", flush=True)
+    print(f"Wear-Leveling Usage Variance : {wear_variance:.2f}", flush=True)
+    print("-" * 80 + "\n", flush=True)

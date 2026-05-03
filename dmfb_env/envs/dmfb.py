@@ -74,7 +74,7 @@ class DMFBEnv(gym.Env):
         self.reward_range = (-1.0, 1.0)
         
         self.b_degrade = b_degrade
-        self.max_step = 2 * (w + l)
+        self.max_step = 5 * (w + l)
         
         self.m_health = np.ones((w, l))
         # Initialize tracking matrix for the wear-leveling penalty
@@ -135,7 +135,11 @@ class DMFBEnv(gym.Env):
             # Assuming m_degrade values < 1.0 indicates a degradable electrode
             if self.m_degrade[self.agt_pos[0]][self.agt_pos[1]] < 1.0:
                 usage_count = self.m_usage[self.agt_pos[0]][self.agt_pos[1]]
-                penalty = self.penalty_lambda * usage_count
+                
+                # Capped Exponential penalty prevents mathematical "freezing"
+                max_penalty = 0.05
+                k = 0.005
+                penalty = max_penalty * (1.0 - math.exp(-k * usage_count))
                 reward -= penalty
 
         return obs, reward, terminated, truncated, {}

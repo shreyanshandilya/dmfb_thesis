@@ -4,213 +4,512 @@ nohup: ignoring input
 ### INITIALIZING PARALLEL EVALUATION ENVIRONMENTS ###
 ================================================================================
 
---- Adaptation Epoch 1/40 ---
+--- Adaptation Epoch 1/100 ---
+    -> Static Baseline Cycles: 6.05
+    -> Standard Agent Cycles : 71.20
+    -> Wear-Leveling Cycles  : 6.40
+
+--- Adaptation Epoch 2/100 ---
+    -> Static Baseline Cycles: 3.20
+    -> Standard Agent Cycles : 25.60
+    -> Wear-Leveling Cycles  : 25.20
+
+--- Adaptation Epoch 3/100 ---
+    -> Static Baseline Cycles: 8.58
+    -> Standard Agent Cycles : 66.20
+    -> Wear-Leveling Cycles  : 13.80
+
+--- Adaptation Epoch 4/100 ---
+    -> Static Baseline Cycles: 15.19
+    -> Standard Agent Cycles : 29.60
+    -> Wear-Leveling Cycles  : 82.80
+
+--- Adaptation Epoch 5/100 ---
+    -> Static Baseline Cycles: 8.07
+    -> Standard Agent Cycles : 17.60
+    -> Wear-Leveling Cycles  : 66.80
+
+--- Adaptation Epoch 6/100 ---
+    -> Static Baseline Cycles: 138.36
+    -> Standard Agent Cycles : 45.80
+    -> Wear-Leveling Cycles  : 83.40
+
+--- Adaptation Epoch 7/100 ---
+    -> Static Baseline Cycles: 140.29
+    -> Standard Agent Cycles : 17.60
+    -> Wear-Leveling Cycles  : 52.00
+
+--- Adaptation Epoch 8/100 ---
+    -> Static Baseline Cycles: 8.05
+    -> Standard Agent Cycles : 9.60
+    -> Wear-Leveling Cycles  : 48.20
+
+--- Adaptation Epoch 9/100 ---
+    -> Static Baseline Cycles: 16.08
+    -> Standard Agent Cycles : 17.80
+    -> Wear-Leveling Cycles  : 40.80
+
+--- Adaptation Epoch 10/100 ---
+    -> Static Baseline Cycles: 9.04
+    -> Standard Agent Cycles : 66.20
+    -> Wear-Leveling Cycles  : 7.20
+
+--- Adaptation Epoch 11/100 ---
+    -> Static Baseline Cycles: 6.72
+    -> Standard Agent Cycles : 56.40
+    -> Wear-Leveling Cycles  : 43.40
+
+--- Adaptation Epoch 12/100 ---
+    -> Static Baseline Cycles: 6.60
+    -> Standard Agent Cycles : 61.80
+    -> Wear-Leveling Cycles  : 11.80
+
+--- Adaptation Epoch 13/100 ---
+    -> Static Baseline Cycles: 9.28
+    -> Standard Agent Cycles : 101.00
+    -> Wear-Leveling Cycles  : 31.20
+
+--- Adaptation Epoch 14/100 ---
+    -> Static Baseline Cycles: 5.54
+    -> Standard Agent Cycles : 56.80
+    -> Wear-Leveling Cycles  : 52.00
+
+--- Adaptation Epoch 15/100 ---
+    -> Static Baseline Cycles: 4.75
+    -> Standard Agent Cycles : 26.80
+    -> Wear-Leveling Cycles  : 64.40
+
+--- Adaptation Epoch 16/100 ---
+    -> Static Baseline Cycles: 5.93
+    -> Standard Agent Cycles : 25.20
+    -> Wear-Leveling Cycles  : 7.40
+
+--- Adaptation Epoch 17/100 ---
+    -> Static Baseline Cycles: 9.20
+    -> Standard Agent Cycles : 76.00
+    -> Wear-Leveling Cycles  : 71.80
+
+--- Adaptation Epoch 18/100 ---
+    -> Static Baseline Cycles: 4.65
+    -> Standard Agent Cycles : 81.20
+    -> Wear-Leveling Cycles  : 57.40
+
+--- Adaptation Epoch 19/100 ---
+    -> Static Baseline Cycles: 12.75
+    -> Standard Agent Cycles : 34.00
+    -> Wear-Leveling Cycles  : 84.80
+
+--- Adaptation Epoch 20/100 ---
+    -> Static Baseline Cycles: 139.63
+    -> Standard Agent Cycles : 44.60
+    -> Wear-Leveling Cycles  : 46.00
+
+--- Adaptation Epoch 21/100 ---
+    -> Static Baseline Cycles: 8.71
+    -> Standard Agent Cycles : 11.20
+    -> Wear-Leveling Cycles  : 66.60
+
+--- Adaptation Epoch 22/100 ---
+    -> Static Baseline Cycles: 6.97
+    -> Standard Agent Cycles : 17.20
+    -> Wear-Leveling Cycles  : 65.20
+
+--- Adaptation Epoch 23/100 ---
+    -> Static Baseline Cycles: 3.11
+    -> Standard Agent Cycles : 6.20
+    -> Wear-Leveling Cycles  : 72.20
+
+--- Adaptation Epoch 24/100 ---
+    -> Static Baseline Cycles: 140.50
+    -> Standard Agent Cycles : 15.40
+    -> Wear-Leveling Cycles  : 89.60
+
+--- Adaptation Epoch 25/100 ---
+    -> Static Baseline Cycles: 7.62
+    -> Standard Agent Cycles : 13.00
+    -> Wear-Leveling Cycles  : 47.00
+
+--- Adaptation Epoch 26/100 ---
+    -> Static Baseline Cycles: 138.25
+    -> Standard Agent Cycles : 25.00
+    -> Wear-Leveling Cycles  : 82.20
+
+--- Adaptation Epoch 27/100 ---
+    -> Static Baseline Cycles: 142.33
+    -> Standard Agent Cycles : 14.60
+    -> Wear-Leveling Cycles  : 46.40
+
+--- Adaptation Epoch 28/100 ---
     -> Static Baseline Cycles: 8.13
-    -> Standard Agent Cycles : 17.50
-    -> Wear-Leveling Cycles  : 12.40
+    -> Standard Agent Cycles : 28.00
+    -> Wear-Leveling Cycles  : 48.00
 
---- Adaptation Epoch 2/40 ---
-    -> Static Baseline Cycles: 29.47
-    -> Standard Agent Cycles : 16.20
-    -> Wear-Leveling Cycles  : 19.28
+--- Adaptation Epoch 29/100 ---
+    -> Static Baseline Cycles: 138.52
+    -> Standard Agent Cycles : 71.40
+    -> Wear-Leveling Cycles  : 82.20
 
---- Adaptation Epoch 3/40 ---
-    -> Static Baseline Cycles: 47.89
-    -> Standard Agent Cycles : 25.06
-    -> Wear-Leveling Cycles  : 30.26
+--- Adaptation Epoch 30/100 ---
+    -> Static Baseline Cycles: 6.40
+    -> Standard Agent Cycles : 27.00
+    -> Wear-Leveling Cycles  : 69.20
 
---- Adaptation Epoch 4/40 ---
-    -> Static Baseline Cycles: 53.83
-    -> Standard Agent Cycles : 19.76
-    -> Wear-Leveling Cycles  : 34.62
+--- Adaptation Epoch 31/100 ---
+    -> Static Baseline Cycles: 5.73
+    -> Standard Agent Cycles : 46.20
+    -> Wear-Leveling Cycles  : 44.60
 
---- Adaptation Epoch 5/40 ---
-    -> Static Baseline Cycles: 25.81
-    -> Standard Agent Cycles : 19.36
-    -> Wear-Leveling Cycles  : 34.12
+--- Adaptation Epoch 32/100 ---
+    -> Static Baseline Cycles: 274.85
+    -> Standard Agent Cycles : 46.60
+    -> Wear-Leveling Cycles  : 69.80
 
---- Adaptation Epoch 6/40 ---
-    -> Static Baseline Cycles: 19.13
-    -> Standard Agent Cycles : 20.02
-    -> Wear-Leveling Cycles  : 39.54
+--- Adaptation Epoch 33/100 ---
+    -> Static Baseline Cycles: 11.90
+    -> Standard Agent Cycles : 68.60
+    -> Wear-Leveling Cycles  : 61.80
 
---- Adaptation Epoch 7/40 ---
-    -> Static Baseline Cycles: 32.71
-    -> Standard Agent Cycles : 19.78
-    -> Wear-Leveling Cycles  : 39.48
+--- Adaptation Epoch 34/100 ---
+    -> Static Baseline Cycles: 9.99
+    -> Standard Agent Cycles : 24.20
+    -> Wear-Leveling Cycles  : 35.00
 
---- Adaptation Epoch 8/40 ---
-    -> Static Baseline Cycles: 34.01
-    -> Standard Agent Cycles : 20.12
-    -> Wear-Leveling Cycles  : 39.48
+--- Adaptation Epoch 35/100 ---
+    -> Static Baseline Cycles: 137.92
+    -> Standard Agent Cycles : 21.00
+    -> Wear-Leveling Cycles  : 44.20
 
---- Adaptation Epoch 9/40 ---
-    -> Static Baseline Cycles: 37.87
-    -> Standard Agent Cycles : 14.14
-    -> Wear-Leveling Cycles  : 40.24
+--- Adaptation Epoch 36/100 ---
+    -> Static Baseline Cycles: 10.20
+    -> Standard Agent Cycles : 28.80
+    -> Wear-Leveling Cycles  : 12.20
 
---- Adaptation Epoch 10/40 ---
-    -> Static Baseline Cycles: 14.29
-    -> Standard Agent Cycles : 16.14
-    -> Wear-Leveling Cycles  : 38.50
+--- Adaptation Epoch 37/100 ---
+    -> Static Baseline Cycles: 276.25
+    -> Standard Agent Cycles : 20.80
+    -> Wear-Leveling Cycles  : 46.00
 
---- Adaptation Epoch 11/40 ---
-    -> Static Baseline Cycles: 56.34
-    -> Standard Agent Cycles : 17.02
-    -> Wear-Leveling Cycles  : 38.72
+--- Adaptation Epoch 38/100 ---
+    -> Static Baseline Cycles: 6.62
+    -> Standard Agent Cycles : 7.00
+    -> Wear-Leveling Cycles  : 10.00
 
---- Adaptation Epoch 12/40 ---
-    -> Static Baseline Cycles: 26.14
-    -> Standard Agent Cycles : 18.40
-    -> Wear-Leveling Cycles  : 40.46
+--- Adaptation Epoch 39/100 ---
+    -> Static Baseline Cycles: 4.81
+    -> Standard Agent Cycles : 10.60
+    -> Wear-Leveling Cycles  : 24.40
 
---- Adaptation Epoch 13/40 ---
-    -> Static Baseline Cycles: 21.89
-    -> Standard Agent Cycles : 16.48
-    -> Wear-Leveling Cycles  : 37.62
+--- Adaptation Epoch 40/100 ---
+    -> Static Baseline Cycles: 150.49
+    -> Standard Agent Cycles : 28.20
+    -> Wear-Leveling Cycles  : 15.40
 
---- Adaptation Epoch 14/40 ---
-    -> Static Baseline Cycles: 18.79
-    -> Standard Agent Cycles : 12.14
-    -> Wear-Leveling Cycles  : 37.44
+--- Adaptation Epoch 41/100 ---
+    -> Static Baseline Cycles: 139.36
+    -> Standard Agent Cycles : 28.00
+    -> Wear-Leveling Cycles  : 38.20
 
---- Adaptation Epoch 15/40 ---
-    -> Static Baseline Cycles: 59.37
-    -> Standard Agent Cycles : 15.74
-    -> Wear-Leveling Cycles  : 40.28
+--- Adaptation Epoch 42/100 ---
+    -> Static Baseline Cycles: 141.66
+    -> Standard Agent Cycles : 25.20
+    -> Wear-Leveling Cycles  : 26.00
 
---- Adaptation Epoch 16/40 ---
-    -> Static Baseline Cycles: 19.90
-    -> Standard Agent Cycles : 12.12
-    -> Wear-Leveling Cycles  : 37.82
+--- Adaptation Epoch 43/100 ---
+    -> Static Baseline Cycles: 8.49
+    -> Standard Agent Cycles : 14.20
+    -> Wear-Leveling Cycles  : 6.80
 
---- Adaptation Epoch 17/40 ---
-    -> Static Baseline Cycles: 34.10
-    -> Standard Agent Cycles : 18.62
-    -> Wear-Leveling Cycles  : 40.22
+--- Adaptation Epoch 44/100 ---
+    -> Static Baseline Cycles: 7.14
+    -> Standard Agent Cycles : 40.60
+    -> Wear-Leveling Cycles  : 11.00
 
---- Adaptation Epoch 18/40 ---
-    -> Static Baseline Cycles: 59.25
-    -> Standard Agent Cycles : 14.72
-    -> Wear-Leveling Cycles  : 37.86
+--- Adaptation Epoch 45/100 ---
+    -> Static Baseline Cycles: 4.91
+    -> Standard Agent Cycles : 25.80
+    -> Wear-Leveling Cycles  : 37.40
 
---- Adaptation Epoch 19/40 ---
-    -> Static Baseline Cycles: 37.01
-    -> Standard Agent Cycles : 14.70
-    -> Wear-Leveling Cycles  : 38.66
+--- Adaptation Epoch 46/100 ---
+    -> Static Baseline Cycles: 137.40
+    -> Standard Agent Cycles : 62.60
+    -> Wear-Leveling Cycles  : 17.00
 
---- Adaptation Epoch 20/40 ---
-    -> Static Baseline Cycles: 53.64
-    -> Standard Agent Cycles : 13.14
-    -> Wear-Leveling Cycles  : 40.28
+--- Adaptation Epoch 47/100 ---
+    -> Static Baseline Cycles: 7.95
+    -> Standard Agent Cycles : 44.60
+    -> Wear-Leveling Cycles  : 26.60
 
---- Adaptation Epoch 21/40 ---
-    -> Static Baseline Cycles: 25.17
-    -> Standard Agent Cycles : 13.16
-    -> Wear-Leveling Cycles  : 39.84
+--- Adaptation Epoch 48/100 ---
+    -> Static Baseline Cycles: 146.58
+    -> Standard Agent Cycles : 62.80
+    -> Wear-Leveling Cycles  : 27.00
 
---- Adaptation Epoch 22/40 ---
-    -> Static Baseline Cycles: 35.70
-    -> Standard Agent Cycles : 14.38
-    -> Wear-Leveling Cycles  : 39.62
+--- Adaptation Epoch 49/100 ---
+    -> Static Baseline Cycles: 8.46
+    -> Standard Agent Cycles : 48.80
+    -> Wear-Leveling Cycles  : 5.40
 
---- Adaptation Epoch 23/40 ---
-    -> Static Baseline Cycles: 28.45
-    -> Standard Agent Cycles : 12.24
-    -> Wear-Leveling Cycles  : 39.40
+--- Adaptation Epoch 50/100 ---
+    -> Static Baseline Cycles: 144.18
+    -> Standard Agent Cycles : 67.80
+    -> Wear-Leveling Cycles  : 57.00
 
---- Adaptation Epoch 24/40 ---
-    -> Static Baseline Cycles: 29.72
-    -> Standard Agent Cycles : 15.78
-    -> Wear-Leveling Cycles  : 39.50
+--- Adaptation Epoch 51/100 ---
+    -> Static Baseline Cycles: 144.46
+    -> Standard Agent Cycles : 53.40
+    -> Wear-Leveling Cycles  : 14.60
 
---- Adaptation Epoch 25/40 ---
-    -> Static Baseline Cycles: 23.40
-    -> Standard Agent Cycles : 15.16
-    -> Wear-Leveling Cycles  : 38.78
+--- Adaptation Epoch 52/100 ---
+    -> Static Baseline Cycles: 4.54
+    -> Standard Agent Cycles : 32.20
+    -> Wear-Leveling Cycles  : 6.60
 
---- Adaptation Epoch 26/40 ---
-    -> Static Baseline Cycles: 34.83
-    -> Standard Agent Cycles : 21.16
-    -> Wear-Leveling Cycles  : 36.16
+--- Adaptation Epoch 53/100 ---
+    -> Static Baseline Cycles: 143.97
+    -> Standard Agent Cycles : 53.20
+    -> Wear-Leveling Cycles  : 42.40
 
---- Adaptation Epoch 27/40 ---
-    -> Static Baseline Cycles: 37.52
-    -> Standard Agent Cycles : 19.60
-    -> Wear-Leveling Cycles  : 39.48
+--- Adaptation Epoch 54/100 ---
+    -> Static Baseline Cycles: 17.85
+    -> Standard Agent Cycles : 12.00
+    -> Wear-Leveling Cycles  : 65.40
 
---- Adaptation Epoch 28/40 ---
-    -> Static Baseline Cycles: 35.55
-    -> Standard Agent Cycles : 15.14
-    -> Wear-Leveling Cycles  : 41.00
+--- Adaptation Epoch 55/100 ---
+    -> Static Baseline Cycles: 7.00
+    -> Standard Agent Cycles : 18.20
+    -> Wear-Leveling Cycles  : 27.00
 
---- Adaptation Epoch 29/40 ---
-    -> Static Baseline Cycles: 59.30
-    -> Standard Agent Cycles : 17.76
-    -> Wear-Leveling Cycles  : 41.00
+--- Adaptation Epoch 56/100 ---
+    -> Static Baseline Cycles: 6.00
+    -> Standard Agent Cycles : 6.80
+    -> Wear-Leveling Cycles  : 8.40
 
---- Adaptation Epoch 30/40 ---
-    -> Static Baseline Cycles: 20.59
-    -> Standard Agent Cycles : 13.22
-    -> Wear-Leveling Cycles  : 39.42
+--- Adaptation Epoch 57/100 ---
+    -> Static Baseline Cycles: 11.56
+    -> Standard Agent Cycles : 10.40
+    -> Wear-Leveling Cycles  : 23.60
 
---- Adaptation Epoch 31/40 ---
-    -> Static Baseline Cycles: 44.33
-    -> Standard Agent Cycles : 15.94
-    -> Wear-Leveling Cycles  : 39.50
+--- Adaptation Epoch 58/100 ---
+    -> Static Baseline Cycles: 5.81
+    -> Standard Agent Cycles : 6.60
+    -> Wear-Leveling Cycles  : 7.60
 
---- Adaptation Epoch 32/40 ---
-    -> Static Baseline Cycles: 70.11
-    -> Standard Agent Cycles : 17.84
-    -> Wear-Leveling Cycles  : 40.14
-
---- Adaptation Epoch 33/40 ---
-    -> Static Baseline Cycles: 26.44
-    -> Standard Agent Cycles : 14.56
-    -> Wear-Leveling Cycles  : 39.42
-
---- Adaptation Epoch 34/40 ---
-    -> Static Baseline Cycles: 43.58
-    -> Standard Agent Cycles : 14.00
-    -> Wear-Leveling Cycles  : 41.00
-
---- Adaptation Epoch 35/40 ---
-    -> Static Baseline Cycles: 36.90
-    -> Standard Agent Cycles : 15.08
-    -> Wear-Leveling Cycles  : 39.46
-
---- Adaptation Epoch 36/40 ---
-    -> Static Baseline Cycles: 21.55
-    -> Standard Agent Cycles : 15.02
-    -> Wear-Leveling Cycles  : 39.40
-
---- Adaptation Epoch 37/40 ---
-    -> Static Baseline Cycles: 27.49
+--- Adaptation Epoch 59/100 ---
+    -> Static Baseline Cycles: 7.17
     -> Standard Agent Cycles : 16.80
-    -> Wear-Leveling Cycles  : 37.94
+    -> Wear-Leveling Cycles  : 28.40
 
---- Adaptation Epoch 38/40 ---
-    -> Static Baseline Cycles: 32.01
-    -> Standard Agent Cycles : 18.34
-    -> Wear-Leveling Cycles  : 39.56
+--- Adaptation Epoch 60/100 ---
+    -> Static Baseline Cycles: 137.71
+    -> Standard Agent Cycles : 43.20
+    -> Wear-Leveling Cycles  : 14.80
 
---- Adaptation Epoch 39/40 ---
-    -> Static Baseline Cycles: 48.49
-    -> Standard Agent Cycles : 17.44
-    -> Wear-Leveling Cycles  : 40.74
+--- Adaptation Epoch 61/100 ---
+    -> Static Baseline Cycles: 143.13
+    -> Standard Agent Cycles : 11.00
+    -> Wear-Leveling Cycles  : 27.20
 
---- Adaptation Epoch 40/40 ---
-    -> Static Baseline Cycles: 33.24
-    -> Standard Agent Cycles : 17.70
-    -> Wear-Leveling Cycles  : 40.22
+--- Adaptation Epoch 62/100 ---
+    -> Static Baseline Cycles: 7.28
+    -> Standard Agent Cycles : 13.40
+    -> Wear-Leveling Cycles  : 26.00
+
+--- Adaptation Epoch 63/100 ---
+    -> Static Baseline Cycles: 8.73
+    -> Standard Agent Cycles : 101.00
+    -> Wear-Leveling Cycles  : 28.20
+
+--- Adaptation Epoch 64/100 ---
+    -> Static Baseline Cycles: 5.75
+    -> Standard Agent Cycles : 16.60
+    -> Wear-Leveling Cycles  : 43.00
+
+--- Adaptation Epoch 65/100 ---
+    -> Static Baseline Cycles: 137.50
+    -> Standard Agent Cycles : 82.20
+    -> Wear-Leveling Cycles  : 8.60
+
+--- Adaptation Epoch 66/100 ---
+    -> Static Baseline Cycles: 270.44
+    -> Standard Agent Cycles : 17.20
+    -> Wear-Leveling Cycles  : 82.40
+
+--- Adaptation Epoch 67/100 ---
+    -> Static Baseline Cycles: 8.39
+    -> Standard Agent Cycles : 30.00
+    -> Wear-Leveling Cycles  : 13.60
+
+--- Adaptation Epoch 68/100 ---
+    -> Static Baseline Cycles: 6.00
+    -> Standard Agent Cycles : 6.80
+    -> Wear-Leveling Cycles  : 62.00
+
+--- Adaptation Epoch 69/100 ---
+    -> Static Baseline Cycles: 13.93
+    -> Standard Agent Cycles : 33.80
+    -> Wear-Leveling Cycles  : 81.20
+
+--- Adaptation Epoch 70/100 ---
+    -> Static Baseline Cycles: 10.93
+    -> Standard Agent Cycles : 27.00
+    -> Wear-Leveling Cycles  : 101.00
+
+--- Adaptation Epoch 71/100 ---
+    -> Static Baseline Cycles: 13.53
+    -> Standard Agent Cycles : 64.80
+    -> Wear-Leveling Cycles  : 46.40
+
+--- Adaptation Epoch 72/100 ---
+    -> Static Baseline Cycles: 8.59
+    -> Standard Agent Cycles : 30.40
+    -> Wear-Leveling Cycles  : 46.20
+
+--- Adaptation Epoch 73/100 ---
+    -> Static Baseline Cycles: 9.10
+    -> Standard Agent Cycles : 64.00
+    -> Wear-Leveling Cycles  : 62.20
+
+--- Adaptation Epoch 74/100 ---
+    -> Static Baseline Cycles: 147.31
+    -> Standard Agent Cycles : 90.80
+    -> Wear-Leveling Cycles  : 80.60
+
+--- Adaptation Epoch 75/100 ---
+    -> Static Baseline Cycles: 17.02
+    -> Standard Agent Cycles : 82.00
+    -> Wear-Leveling Cycles  : 69.00
+
+--- Adaptation Epoch 76/100 ---
+    -> Static Baseline Cycles: 9.06
+    -> Standard Agent Cycles : 71.80
+    -> Wear-Leveling Cycles  : 47.00
+
+--- Adaptation Epoch 77/100 ---
+    -> Static Baseline Cycles: 8.71
+    -> Standard Agent Cycles : 81.60
+    -> Wear-Leveling Cycles  : 51.80
+
+--- Adaptation Epoch 78/100 ---
+    -> Static Baseline Cycles: 6.80
+    -> Standard Agent Cycles : 66.40
+    -> Wear-Leveling Cycles  : 101.00
+
+--- Adaptation Epoch 79/100 ---
+    -> Static Baseline Cycles: 10.35
+    -> Standard Agent Cycles : 64.60
+    -> Wear-Leveling Cycles  : 70.20
+
+--- Adaptation Epoch 80/100 ---
+    -> Static Baseline Cycles: 9.79
+    -> Standard Agent Cycles : 43.00
+    -> Wear-Leveling Cycles  : 62.20
+
+--- Adaptation Epoch 81/100 ---
+    -> Static Baseline Cycles: 9.16
+    -> Standard Agent Cycles : 81.40
+    -> Wear-Leveling Cycles  : 89.20
+
+--- Adaptation Epoch 82/100 ---
+    -> Static Baseline Cycles: 13.03
+    -> Standard Agent Cycles : 30.60
+    -> Wear-Leveling Cycles  : 81.60
+
+--- Adaptation Epoch 83/100 ---
+    -> Static Baseline Cycles: 137.79
+    -> Standard Agent Cycles : 25.40
+    -> Wear-Leveling Cycles  : 65.40
+
+--- Adaptation Epoch 84/100 ---
+    -> Static Baseline Cycles: 7.17
+    -> Standard Agent Cycles : 18.00
+    -> Wear-Leveling Cycles  : 62.20
+
+--- Adaptation Epoch 85/100 ---
+    -> Static Baseline Cycles: 140.04
+    -> Standard Agent Cycles : 29.20
+    -> Wear-Leveling Cycles  : 101.00
+
+--- Adaptation Epoch 86/100 ---
+    -> Static Baseline Cycles: 4.58
+    -> Standard Agent Cycles : 4.80
+    -> Wear-Leveling Cycles  : 101.00
+
+--- Adaptation Epoch 87/100 ---
+    -> Static Baseline Cycles: 11.54
+    -> Standard Agent Cycles : 16.60
+    -> Wear-Leveling Cycles  : 101.00
+
+--- Adaptation Epoch 88/100 ---
+    -> Static Baseline Cycles: 8.39
+    -> Standard Agent Cycles : 9.40
+    -> Wear-Leveling Cycles  : 64.40
+
+--- Adaptation Epoch 89/100 ---
+    -> Static Baseline Cycles: 6.13
+    -> Standard Agent Cycles : 44.20
+    -> Wear-Leveling Cycles  : 101.00
+
+--- Adaptation Epoch 90/100 ---
+    -> Static Baseline Cycles: 10.77
+    -> Standard Agent Cycles : 35.00
+    -> Wear-Leveling Cycles  : 83.60
+
+--- Adaptation Epoch 91/100 ---
+    -> Static Baseline Cycles: 12.03
+    -> Standard Agent Cycles : 16.60
+    -> Wear-Leveling Cycles  : 82.00
+
+--- Adaptation Epoch 92/100 ---
+    -> Static Baseline Cycles: 8.70
+    -> Standard Agent Cycles : 11.60
+    -> Wear-Leveling Cycles  : 50.00
+
+--- Adaptation Epoch 93/100 ---
+    -> Static Baseline Cycles: 15.41
+    -> Standard Agent Cycles : 22.60
+    -> Wear-Leveling Cycles  : 88.00
+
+--- Adaptation Epoch 94/100 ---
+    -> Static Baseline Cycles: 16.28
+    -> Standard Agent Cycles : 10.60
+    -> Wear-Leveling Cycles  : 82.80
+
+--- Adaptation Epoch 95/100 ---
+    -> Static Baseline Cycles: 6.53
+    -> Standard Agent Cycles : 6.80
+    -> Wear-Leveling Cycles  : 64.20
+
+--- Adaptation Epoch 96/100 ---
+    -> Static Baseline Cycles: 6.76
+    -> Standard Agent Cycles : 6.80
+    -> Wear-Leveling Cycles  : 62.20
+
+--- Adaptation Epoch 97/100 ---
+    -> Static Baseline Cycles: 137.52
+    -> Standard Agent Cycles : 6.80
+    -> Wear-Leveling Cycles  : 62.20
+
+--- Adaptation Epoch 98/100 ---
+    -> Static Baseline Cycles: 140.59
+    -> Standard Agent Cycles : 17.40
+    -> Wear-Leveling Cycles  : 81.60
+
+--- Adaptation Epoch 99/100 ---
+    -> Static Baseline Cycles: 139.23
+    -> Standard Agent Cycles : 28.80
+    -> Wear-Leveling Cycles  : 65.40
+
+--- Adaptation Epoch 100/100 ---
+    -> Static Baseline Cycles: 10.86
+    -> Standard Agent Cycles : 14.80
+    -> Wear-Leveling Cycles  : 101.00
 
 
-================================================================================
-### FINAL ADAPTATION CYCLES PER EPOCH (50% DEGRADATION) ###
-Static Baseline Cycles : [np.float64(8.13), np.float64(29.47), np.float64(47.89), np.float64(53.83), np.float64(25.81), np.float64(19.13), np.float64(32.71), np.float64(34.01), np.float64(37.87), np.float64(14.29), np.float64(56.34), np.float64(26.14), np.float64(21.89), np.float64(18.79), np.float64(59.37), np.float64(19.9), np.float64(34.1), np.float64(59.25), np.float64(37.01), np.float64(53.64), np.float64(25.17), np.float64(35.7), np.float64(28.45), np.float64(29.72), np.float64(23.4), np.float64(34.83), np.float64(37.52), np.float64(35.55), np.float64(59.3), np.float64(20.59), np.float64(44.33), np.float64(70.11), np.float64(26.44), np.float64(43.58), np.float64(36.9), np.float64(21.55), np.float64(27.49), np.float64(32.01), np.float64(48.49), np.float64(33.24)]
-Standard Agent Cycles  : [np.float64(17.5), np.float64(16.2), np.float64(25.06), np.float64(19.76), np.float64(19.36), np.float64(20.02), np.float64(19.78), np.float64(20.12), np.float64(14.14), np.float64(16.14), np.float64(17.02), np.float64(18.4), np.float64(16.48), np.float64(12.14), np.float64(15.74), np.float64(12.12), np.float64(18.62), np.float64(14.72), np.float64(14.7), np.float64(13.14), np.float64(13.16), np.float64(14.38), np.float64(12.24), np.float64(15.78), np.float64(15.16), np.float64(21.16), np.float64(19.6), np.float64(15.14), np.float64(17.76), np.float64(13.22), np.float64(15.94), np.float64(17.84), np.float64(14.56), np.float64(14.0), np.float64(15.08), np.float64(15.02), np.float64(16.8), np.float64(18.34), np.float64(17.44), np.float64(17.7)]
-Wear-Leveling Cycles   : [np.float64(12.4), np.float64(19.28), np.float64(30.26), np.float64(34.62), np.float64(34.12), np.float64(39.54), np.float64(39.48), np.float64(39.48), np.float64(40.24), np.float64(38.5), np.float64(38.72), np.float64(40.46), np.float64(37.62), np.float64(37.44), np.float64(40.28), np.float64(37.82), np.float64(40.22), np.float64(37.86), np.float64(38.66), np.float64(40.28), np.float64(39.84), np.float64(39.62), np.float64(39.4), np.float64(39.5), np.float64(38.78), np.float64(36.16), np.float64(39.48), np.float64(41.0), np.float64(41.0), np.float64(39.42), np.float64(39.5), np.float64(40.14), np.float64(39.42), np.float64(41.0), np.float64(39.46), np.float64(39.4), np.float64(37.94), np.float64(39.56), np.float64(40.74), np.float64(40.22)]
-================================================================================
+[Success] Shaded Plot saved to log/parallel_eval_shaded_10x10.png
 
+--------------------------------------------------------------------------------
+### FINAL WEAR-LEVELING VARIANCE ANALYSIS ###
+Standard Agent Usage Variance: 12599619.37
+Wear-Leveling Usage Variance : 9249949.49
+--------------------------------------------------------------------------------
 
-[Success] Plot saved to log/parallel_eval_10x10.png
