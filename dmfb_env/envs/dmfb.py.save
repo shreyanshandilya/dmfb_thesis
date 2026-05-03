@@ -129,14 +129,11 @@ class DMFBEnv(gym.Env):
             reward = -0.3
         else:
             reward = -0.8
-
-       	# 6. Apply Wear-Leveling Penalty ONLY if enabled, not terminated, AND electrode is degradable
+        # 6. Apply Wear-Leveling Penalty ONLY if enabled and task isn't finished
         if self.use_wear_leveling and not terminated:
-            # Assuming m_degrade values < 1.0 indicates a degradable electrode
-            if self.m_degrade[self.agt_pos[0]][self.agt_pos[1]] < 1.0:
-                usage_count = self.m_usage[self.agt_pos[0]][self.agt_pos[1]]
-                penalty = self.penalty_lambda * usage_count
-                reward -= penalty
+            usage_count = self.m_usage[self.agt_pos[0]][self.agt_pos[1]]
+            penalty = self.penalty_lambda * usage_count
+            reward -= penalty
 
         return obs, reward, terminated, truncated, {}
 
@@ -149,13 +146,7 @@ class DMFBEnv(gym.Env):
         if self.b_random is True:
             self.agt_pos, self.agt_end = self._randomSartNEnd()
         else:
-            # If b_random is false, we can manually inject start/end coordinates 
-            # from the outside for our perfectly controlled tests.
-            if hasattr(self, 'injected_start'):
-                self.agt_pos = self.injected_start
-                self.agt_end = self.injected_end
-            else:
-                self.agt_pos, self.agt_end = self._getNextSartNEnd()
+            self.agt_pos, self.agt_end = self._getNextSartNEnd()
             
         self.agt_sta = copy.deepcopy(self.agt_pos)
         
@@ -165,9 +156,8 @@ class DMFBEnv(gym.Env):
         self._updateHealth()
         self.m_distance = self._computeDist()
         
-        # -----> CRITICAL FIX <-----
-        # self.m_usage = np.zeros((self.width, self.length)) 
-        # This line is completely removed so wear and tear accumulates continuously!
+        # Reset the tracking matrix for wear-leveling (using the correct variable name)
+        self.m_usage = np.zeros((self.width, self.length))
         
         # Return observation and the info dict (standard Gymnasium format)
         return self._get_obs(), {}
